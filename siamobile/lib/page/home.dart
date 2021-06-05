@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:siamobile/constant/color.dart';
 import 'package:siamobile/page/info.dart';
+import 'package:siamobile/page/login.dart';
 import 'package:siamobile/page/profile.dart';
 import 'package:siamobile/page/schedule.dart';
 import 'package:siamobile/page/status.dart';
 import 'package:siamobile/page/transcript.dart';
+import 'package:siamobile/provider/apim_provider.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -14,6 +17,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Future<void> logout() async {
+    await Provider.of<ProviderAPIM>(context, listen: false)
+        .logout()
+        .then((value) async {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => LoginPage()),
+          (Route<dynamic> route) => false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -285,11 +298,15 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         Widget cancelButton = FlatButton(
                           child: Text("Batal"),
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                         );
                         Widget continueButton = FlatButton(
                           child: Text("Keluar"),
-                          onPressed: () {},
+                          onPressed: () {
+                            logout();
+                          },
                         );
                         // set up the AlertDialog
                         AlertDialog alert = AlertDialog(

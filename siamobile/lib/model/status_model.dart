@@ -4,10 +4,10 @@
 
 import 'dart:convert';
 
-StatusModel transkripModelFromJson(String str) =>
+StatusModel statusModelFromJson(String str) =>
     StatusModel.fromJson(json.decode(str));
 
-String transkripModelToJson(StatusModel data) => json.encode(data.toJson());
+String statusModelToJson(StatusModel data) => json.encode(data.toJson());
 
 class StatusModel {
   StatusModel({

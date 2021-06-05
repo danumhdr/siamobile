@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:siamobile/constant/color.dart';
 import 'package:siamobile/page/home.dart';
+import 'package:siamobile/provider/apim_provider.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -10,6 +13,33 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  TextEditingController username = TextEditingController();
+  TextEditingController password = TextEditingController();
+
+  Future<void> _authlogin(BuildContext ctx) async {
+    final Map<String, dynamic> postdata = {
+      "username": username.text,
+      "password": password.text
+    };
+
+    await Provider.of<ProviderAPIM>(context, listen: false)
+        .login(postdata)
+        .then((value) async {
+      if (value.status == 201) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("username", value.data.userid);
+        prefs.setString("token", value.data.token);
+        Navigator.pushReplacement(
+          ctx,
+          MaterialPageRoute(builder: (ctx) => HomePage()),
+        );
+        print("success masuk");
+      } else {
+        print("Gagal Login");
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -57,6 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                   margin: new EdgeInsets.only(left: 30, right: 30, top: 20),
                   padding: new EdgeInsets.all(10),
                   child: TextField(
+                    controller: username,
                     style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w400),
                     decoration: InputDecoration(
@@ -82,6 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                   margin: new EdgeInsets.only(left: 30, right: 30),
                   padding: new EdgeInsets.all(10),
                   child: TextField(
+                    controller: password,
                     obscureText: true,
                     style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w400),
@@ -107,10 +139,11 @@ class _LoginPageState extends State<LoginPage> {
             ),
             InkWell(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => HomePage()),
+                // );
+                _authlogin(context);
               },
               child: Container(
                 margin: new EdgeInsets.only(left: 30, right: 30),

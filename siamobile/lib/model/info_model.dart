@@ -4,10 +4,9 @@
 
 import 'dart:convert';
 
-InfoModel profileModelFromJson(String str) =>
-    InfoModel.fromJson(json.decode(str));
+InfoModel infoModelFromJson(String str) => InfoModel.fromJson(json.decode(str));
 
-String profileModelToJson(InfoModel data) => json.encode(data.toJson());
+String infoModelToJson(InfoModel data) => json.encode(data.toJson());
 
 class InfoModel {
   InfoModel({

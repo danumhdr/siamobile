@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:siamobile/constant/color.dart';
+import 'package:siamobile/model/auth_model.dart';
+import 'package:siamobile/provider/apim_provider.dart';
 
 class SchedulePage extends StatefulWidget {
   SchedulePage({Key key}) : super(key: key);
@@ -9,6 +13,31 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
+  var _provider;
+  int smstr;
+
+  @override
+  void initState() {
+    super.initState();
+    getProfile();
+  }
+
+  Future<void> getProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final Map<String, dynamic> postdata = {
+      "token": prefs.getString('token'),
+      "semester": _selectedLocation
+    };
+    _provider =
+        Provider.of<ProviderAPIM>(context, listen: false).getSchedule(postdata);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getProfile();
+  }
+
   var androidVersions = [
     "Android Cupcake",
     "Android Donut",
@@ -32,7 +61,7 @@ class _SchedulePageState extends State<SchedulePage> {
     "Android Oreo",
     "Android Pie"
   ];
-  List<String> _locations = ['1', '2', '3', '4'];
+  List<String> _locations = ['1', '2', '3', '4', '5', '6', '7', '8'];
   String _selectedLocation;
   @override
   Widget build(BuildContext context) {
@@ -72,53 +101,64 @@ class _SchedulePageState extends State<SchedulePage> {
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                separatorBuilder: (context, index) {
-                  return Divider(
-                    color: Colors.grey,
-                  );
-                },
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 80,
-                    padding: const EdgeInsets.all(10.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          child: Icon(Icons.inbox_outlined),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.35,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                  margin: new EdgeInsets.only(left: 15),
-                                  child: Text("MKU-1001")),
-                              Container(
-                                  margin: new EdgeInsets.only(left: 15),
-                                  child: Text("Agama")),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          child: Column(
-                            children: [
-                              Container(child: Text("Kamis")),
-                              Container(child: Text("Kelas A")),
-                              Container(child: Text("10.00 - 12.00")),
-                            ],
-                          ),
-                        ),
-                        Text("22/30 Orang")
-                      ],
-                    ),
-                  );
-                },
-                itemCount: androidVersions.length,
-              ),
+              child: FutureBuilder<AuthModel>(
+                  future: _provider,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return ListView.separated(
+                        separatorBuilder: (context, index) {
+                          return Divider(
+                            color: Colors.grey,
+                          );
+                        },
+                        itemBuilder: (context, index) {
+                          return Container(
+                            height: 80,
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              children: [
+                                Container(
+                                  child: Icon(Icons.inbox_outlined),
+                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.35,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                          margin: new EdgeInsets.only(left: 15),
+                                          child: Text("MKU-1001")),
+                                      Container(
+                                          margin: new EdgeInsets.only(left: 15),
+                                          child: Text("Agama")),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: Column(
+                                    children: [
+                                      Container(child: Text("Kamis")),
+                                      Container(child: Text("Kelas A")),
+                                      Container(child: Text("10.00 - 12.00")),
+                                    ],
+                                  ),
+                                ),
+                                Text("22/30 Orang")
+                              ],
+                            ),
+                          );
+                        },
+                        itemCount: androidVersions.length,
+                      );
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  }),
             ),
           ],
         ),

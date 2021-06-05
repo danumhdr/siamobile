@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:siamobile/constant/color.dart';
+import 'package:siamobile/model/info_model.dart';
+import 'package:siamobile/provider/apim_provider.dart';
 
 class InfoPage extends StatefulWidget {
   InfoPage({Key key}) : super(key: key);
@@ -32,6 +35,22 @@ class _InfoPageState extends State<InfoPage> {
     "Android Oreo",
     "Android Pie"
   ];
+  var _provider;
+
+  @override
+  void initState() {
+    super.initState();
+    _provider = Provider.of<ProviderAPIM>(context, listen: false).getInfo();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {
+      _provider = Provider.of<ProviderAPIM>(context, listen: false).getInfo();
+    });
+  }
+
   showAlertDialog(BuildContext context) {
     // set up the button
     Widget okButton = FlatButton(
@@ -78,36 +97,45 @@ class _InfoPageState extends State<InfoPage> {
           )
         ],
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        child: ListView.separated(
-          separatorBuilder: (context, index) {
-            return Divider(
-              color: Colors.grey,
-            );
-          },
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                showAlertDialog(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  children: [
-                    Container(
-                      child: Icon(Icons.inbox_outlined),
+      body: FutureBuilder<InfoModel>(
+        future: _provider,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              child: ListView.separated(
+                separatorBuilder: (context, index) {
+                  return Divider(
+                    color: Colors.grey,
+                  );
+                },
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      showAlertDialog(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            child: Icon(Icons.inbox_outlined),
+                          ),
+                          Container(
+                              margin: new EdgeInsets.only(left: 8),
+                              child: Text(snapshot.data.data[index].judul)),
+                        ],
+                      ),
                     ),
-                    Container(
-                        margin: new EdgeInsets.only(left: 8),
-                        child: Text(androidVersions[index])),
-                  ],
-                ),
+                  );
+                },
+                itemCount: androidVersions.length,
               ),
             );
-          },
-          itemCount: androidVersions.length,
-        ),
+          } else {
+            return CircularProgressIndicator();
+          }
+        },
       ),
     );
   }
